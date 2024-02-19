@@ -1,0 +1,15 @@
+{
+  "name": "@nx-workspace/runner",
+  "version": "0.0.1",
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.515.0",
+    "tar": "6.2.0",
+    "nx": "18.0.4"
+  },
+  "devDependencies": {
+    "@types/tar": "6.1.11"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
+}

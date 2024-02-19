@@ -1,0 +1,4 @@
+packages:
+  # include packages in all subfolders except dist (e.g. apps/ and packages/)
+  - "**/**"
+  - "!**/dist/**"
