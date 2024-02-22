@@ -36,33 +36,39 @@ const tasksRunner = async (
     daemon: DaemonClient;
   },
 ) => {
+  let remoteCache: RemoteCache | undefined;
+
   if (options.host) {
-    options.remoteCache = new RemoteCache({
+    remoteCache = new RemoteCache({
       host: options.host,
       verbose: Boolean(context.nxArgs.verbose),
       tasks,
     });
+
+    options.remoteCache = remoteCache;
   } else {
     console.warn('Missing `host` configuration, skipping remote cache.');
   }
 
   options['parallel'] = options['parallel'] || parseInt(process.env['NX_PARALLEL'] || '') || 3;
 
-  options.lifeCycle.startCommand?.();
-  const orchestrator = new TaskOrchestrator(
-    context.hasher,
-    context.initiatingProject,
-    context.projectGraph,
-    context.taskGraph,
-    options,
-    Boolean(context.nxArgs?.nxBail),
-    context.daemon,
-  );
-
   try {
-    const res = await orchestrator.run();
-    return res;
+    options.lifeCycle.startCommand?.();
+
+    const orchestrator = new TaskOrchestrator(
+      context.hasher,
+      context.initiatingProject,
+      context.projectGraph,
+      context.taskGraph,
+      options,
+      Boolean(context.nxArgs?.nxBail),
+      context.daemon,
+    );
+    return await orchestrator.run();
   } finally {
+    if (remoteCache) {
+      await remoteCache.finishUploadingCaches();
+    }
     options.lifeCycle.endCommand?.();
   }
 };
