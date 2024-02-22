@@ -117,7 +117,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.setHeader('Content-Length', data.ContentLength!);
       res.setHeader('Content-Type', data.ContentType!);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      return (data.Body as IncomingMessage).pipe(res);
+      (data.Body as IncomingMessage).pipe(res);
+      return;
     } catch (e) {
       res.status(404).json({ ok: false, id: hash });
       return;
