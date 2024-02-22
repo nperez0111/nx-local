@@ -18,7 +18,7 @@
     "default": {
       "runner": "./dist/runner/src/index",
       "options": {
-        "host": "http://localhost:3000/api/projects/8fd3b0bb-060d-46dd-abbc-982cfbd3e2a2/"
+        "host": "http://localhost:3000/api/projects/d8c32bde-3679-4f6d-a82c-bf504ac30066/"
       }
     }
   },
