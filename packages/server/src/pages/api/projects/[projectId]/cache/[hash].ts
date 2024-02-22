@@ -3,7 +3,8 @@ import { and, eq, sql } from 'drizzle-orm';
 import { type IncomingMessage } from 'http';
 import ms from 'ms';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Stream } from 'stream';
+import { Readable, Stream, Transform } from 'stream';
+import { pipeline } from 'stream/promises';
 import { z } from 'zod';
 
 import { env } from '@/env';
@@ -43,17 +44,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(404).json({ ok: false, id: hash });
       return;
     }
-    const body = new Stream.PassThrough();
-    req.pipe(body);
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
     try {
-      const contentLength = parseInt(req.headers['content-length'] ?? '0');
+      const expiresAt = new Date(Date.now() + ms('1w'));
+      const requestBody = Buffer.concat(chunks);
+      const contentLength = requestBody.length;
+
       await s3Client.send(
         new PutObjectCommand({
           Key: projectId + '/' + hash,
           Bucket: env.AWS_BUCKET_NAME,
-          Body: body,
+          Body: requestBody,
           ContentLength: contentLength,
-          Expires: new Date(Date.now() + ms('1w')),
+          Expires: expiresAt,
         }),
       );
       const {
@@ -80,6 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         nxProject,
         startTime: startTime,
         updatedAt: new Date(),
+        expiresAt,
       });
       res.status(200).json({ ok: true, id: hash });
       return;

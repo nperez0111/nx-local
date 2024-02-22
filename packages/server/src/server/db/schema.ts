@@ -51,6 +51,7 @@ export const projectCaches = createTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp('updated_at'),
+    expiresAt: timestamp('expires_at'),
     downloads: integer('downloads').notNull(),
   },
   (projectCache) => ({
